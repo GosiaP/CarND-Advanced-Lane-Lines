@@ -8,6 +8,20 @@ from image_processor import BinaryImageCreator
 from moviepy.editor import VideoFileClip
 import glob
 
+import contextlib
+
+# Setups print options for numbers locally
+@contextlib.contextmanager
+def print_options(*args, **kwargs):
+    original = np.get_printoptions()
+    np.set_printoptions(*args, **kwargs)
+    try:
+        yield
+    finally:
+        np.set_printoptions(**original)
+
+# Defines a region of interest per source and destination points.
+# Provides perspective matrix and its inverse matrix.
 class RegionOfInterest:
 
     def __init__(self, image_size,  width2_p=0.125, height1_p=0.07, height2_p=0.375):
@@ -34,6 +48,16 @@ class RegionOfInterest:
 
         self.M = cv2.getPerspectiveTransform(self.pts, self.dst)
         self.M_inv = cv2.getPerspectiveTransform(self.dst, self.pts)
+
+        """
+        # to get src, dst and matrix values
+        with print_options(precision=3, suppress=True):
+            print("src", self.pts)
+            print("dest", self.dst)
+            print("M", self.M)
+            print("M_inv", self.M_inv)
+            print("dfsd")
+        """
 
     def draw_into_image(self, image):
         cv2.polylines(image, [self.pts.astype(np.int32)], isClosed=True, color=(255,20,147), thickness=3)
@@ -143,7 +167,7 @@ if __name__ == '__main__':
     #video_file = 'challenge_video.mp4'
     video_path = os.path.join('output_videos', video_file)
     clip = VideoFileClip(video_file)
-    #clip = VideoFileClip(video_file).subclip(0,3)
+    #clip = VideoFileClip(video_file).subclip(0,5)
     processor = LaneDetector((clip.h, clip.w, 3))
     new_clip = clip.fl_image(processor.process)
     new_clip.write_videofile(video_path, audio=False)
@@ -153,7 +177,7 @@ if __name__ == '__main__':
     print("Testing lane tracker ....")
     image = mpimg.imread('test_images/straight_lines1.jpg')
 
-    processor = LaneTracker(image.shape)
+    processor = LaneDetector(image.shape)
     res_img = processor.process(image)
     BinaryImageCreator.plot_images(image, res_img)
     print("Testing lane tracker")

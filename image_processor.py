@@ -164,8 +164,9 @@ class BinaryImageCreator:
 if __name__ == '__main__':
 
     print("Testing of binary image ....")
+
     """
-    image = mpimg.imread('camera_cal/calibration2.jpg')
+    image = mpimg.imread('test_images/test2.jpg')
     cam_calib = CameraCalibration()
     rr = cam_calib.undistort(image)
     BinaryImageCreator.plot_images(image, rr)
